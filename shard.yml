@@ -1,0 +1,9 @@
+name: talgene
+version: 0.1.0
+
+authors:
+  - Elia Franzella <eliafranzella@live.it>
+
+crystal: 1.7.0
+
+license: MIT
