@@ -100,7 +100,7 @@ class Generation < Talgene::Generation(Knapsack)
 
   private def compute_selection
     other_bucket = @population.reject do |knapsack|
-      knapsack == fittest
+      knapsack.same? fittest
     end
 
     Array.new @population.size do
