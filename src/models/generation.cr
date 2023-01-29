@@ -4,23 +4,17 @@ module Talgene
   abstract class Generation(T)
     include Talgene::Selectable(T)
 
-    @fittest : T? = nil
+    def initialize(@population : Array(T))
+    end
 
     getter population : Array(T)
 
-    def initialize(@population : Array(T))
+    getter fittest : T do
+      @population.max
     end
 
     def best_fitness
       fittest.fitness
-    end
-
-    def fittest : T
-      @fittest ||= compute_fittest
-    end
-
-    private def compute_fittest
-      @population.max_by &.fitness
     end
 
     class GenerationIterator(T)
