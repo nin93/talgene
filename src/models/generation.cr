@@ -26,6 +26,8 @@ module Talgene
     class GenerationIterator(T)
       include Iterator(T)
 
+      @at_start : Bool = true
+
       getter elapsed : Int32 = 0
       getter current : T
 
@@ -33,12 +35,15 @@ module Talgene
       end
 
       def next
-        if @elapsed < @max_iterations
-          @elapsed += 1
+        if @at_start
+          @at_start = false
 
-          @current = T.new @current.selection
-        else
+          @current
+        elsif @elapsed == @max_iterations
           stop
+        else
+          @elapsed += 1
+          @current = T.new @current.selection
         end
       end
     end
