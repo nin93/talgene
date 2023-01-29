@@ -10,6 +10,10 @@ module Talgene
       @iterator = Talgene::Generation::GenerationIterator.new @generation, @max_iterations
     end
 
+    def initialize(@generation : T, *, @max_iterations : Int32, &block : T -> Bool)
+      @iterator = Talgene::Generation::GenerationIterator.new @generation, @max_iterations, &block
+    end
+
     def current_iteration
       @iterator.elapsed
     end
