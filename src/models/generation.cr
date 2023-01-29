@@ -22,24 +22,24 @@ module Talgene
     private def compute_fittest
       @population.max_by &.fitness
     end
-  end
 
-  class GenerationIterator(T)
-    include Iterator(T)
+    class GenerationIterator(T)
+      include Iterator(T)
 
-    getter produced : Int32 = 0
-    getter current : T
+      getter produced : Int32 = 0
+      getter current : T
 
-    def initialize(@current : T, @max_iterations : Int32)
-    end
+      def initialize(@current : T, @max_iterations : Int32)
+      end
 
-    def next
-      if @produced < @max_iterations
-        @produced += 1
+      def next
+        if @produced < @max_iterations
+          @produced += 1
 
-        @current = T.new @current.selection
-      else
-        stop
+          @current = T.new @current.selection
+        else
+          stop
+        end
       end
     end
   end
