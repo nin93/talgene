@@ -1,2 +1,3 @@
-require "./selectable"
+require "./crossable"
 require "./fittable"
+require "./selectable"
