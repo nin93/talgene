@@ -5,10 +5,10 @@ module Talgene
     include Iterable(T)
     include Enumerable(T)
 
-    getter iterator : Talgene::Generation::GenerationIterator(T)
-
     def initialize(@generation : T, *, @max_iterations : Int32)
       @iterator = Talgene::Generation::GenerationIterator.new @generation, @max_iterations
+    @iterator : Talgene::Generation::GenerationIterator(T)
+
     end
 
     def initialize(@generation : T, *, @max_iterations : Int32, &block : T -> Bool)
