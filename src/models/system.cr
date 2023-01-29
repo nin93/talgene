@@ -3,6 +3,7 @@ require "./generation"
 module Talgene
   class System(T)
     include Iterable(T)
+    include Enumerable(T)
 
     getter iterator : Talgene::Generation::GenerationIterator(T)
 
@@ -20,6 +21,10 @@ module Talgene
 
     def each
       @iterator
+    end
+
+    def each(& : T ->)
+      @iterator.each { |gen| yield gen }
     end
   end
 end
