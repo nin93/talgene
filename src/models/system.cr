@@ -11,8 +11,10 @@ module Talgene
       @iterator = Talgene::Generation::GenerationIterator.new initial, max_iterations
     end
 
-    def initialize(initial : T, *, max_iterations : Int32, &block : T -> Bool)
-      @iterator = Talgene::Generation::GenerationIterator.new initial, max_iterations, &block
+    def self.new(initial : T, *, max_iterations : Int32)
+      system = System.new initial, max_iterations: max_iterations
+      with system yield
+      system
     end
 
     def stop_on(&block : T -> Bool)
