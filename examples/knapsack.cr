@@ -57,11 +57,13 @@ class Knapsack < Talgene::Genome(Item)
 
   def mutate : Knapsack
     new_genes = map do |item|
-      item.dup.tap do |it|
-        if @mutation_rate > rand
-          it.inside = !it.inside?
-        end
+      new_item = item.dup
+
+      if @mutation_rate > rand
+        new_item.inside = !new_item.inside?
       end
+
+      new_item
     end
 
     Knapsack.new new_genes, @max_weight, @max_volume, @mutation_rate
@@ -99,20 +101,14 @@ class Generation < Talgene::Generation(Knapsack)
 end
 
 population_zero = Array.new 50 do
-  genes = ITEM_POOL.map do |item|
-    unless 0.5 < rand
-      Item.new item.value, item.weight, item.volume, true
-    else
-      item
-    end
-  end
+  genes = ITEM_POOL.dup
 
-  Knapsack.new genes, max_weight: 20, max_volume: 25, mutation_rate: 0.3
+  Knapsack.new genes, max_weight: 20, max_volume: 25, mutation_rate: 0.1
 end
 
 generation_zero = Generation.new population_zero
 
-sys = Talgene::System.new generation_zero, max_iterations: 700 do |current|
+sys = Talgene::System.new generation_zero, max_iterations: 100 do |current|
   current.best_fitness > 26
 end
 

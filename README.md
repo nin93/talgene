@@ -80,11 +80,13 @@ class Knapsack < Talgene::Genome(Item)
 
   def mutate : Knapsack
     new_genes = map do |item|
-      item.dup.tap do |new_item|
-        if @mutation_rate > rand
-          new_item.inside = !new_item.inside?
-        end
+      new_item = item.dup
+
+      if @mutation_rate > rand
+        new_item.inside = !new_item.inside?
       end
+
+      new_item
     end
 
     Knapsack.new new_genes, @max_weight, @mutation_rate
@@ -126,7 +128,7 @@ We load the generation zero:
 population_zero = [...] of Knapsack
 generation_zero = Generation.new population_zero
 
-sys = Talgene::System.new generation_zero, max_iterations: 700 
+sys = Talgene::System.new generation_zero, max_iterations: 100 
 
 # Since `Talgene::System` includes the `Enumerable` module, a set of convenient methods are
 # provided such as `max_by`, `skip_while`, `select`, `each_cons`. For instance, the fittest
@@ -140,7 +142,7 @@ process should be ended in advance, useful in those cases in which we would expe
 enough individual beforehand. For instance:
 
 ```crystal
-sys = Talgene::System.new generation_zero, max_iterations: 700 do |current|
+sys = Talgene::System.new generation_zero, max_iterations: 100 do |current|
   current.best_fitness > 25.0
 end
 
