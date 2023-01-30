@@ -33,6 +33,10 @@ module Talgene
         @early_stop_proc = block
       end
 
+      def stop_on(&block : T -> Bool) : Nil
+        @early_stop_proc = block
+      end
+
       def next
         if @at_start
           @at_start = false
