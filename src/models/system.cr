@@ -15,6 +15,10 @@ module Talgene
       @iterator = Talgene::Generation::GenerationIterator.new initial, max_iterations, &block
     end
 
+    def stop_on(&block : T -> Bool)
+      @iterator.stop_on &block
+    end
+
     def current_iteration
       @iterator.elapsed
     end
