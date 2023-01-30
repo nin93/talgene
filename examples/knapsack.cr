@@ -5,7 +5,9 @@ struct Item
   getter weight : Float64
   getter volume : Float64
 
-  def initialize(@value : Float64, @weight : Float64, @volume : Float64)
+  property? inside : Bool
+
+  def initialize(@value : Float64, @weight : Float64, @volume : Float64, @inside : Bool = false)
   end
 end
 
@@ -24,81 +26,68 @@ ITEM_POOL = [
 
 class Knapsack < Talgene::Genome(Item)
   def initialize(
-    @genes : Array(Item), *,
+    @genes : Array(Item),
     @max_weight : Float64,
     @max_volume : Float64,
-    @mutation_rate : Float64 = 0.1
+    @mutation_rate : Float64
   )
   end
 
-  @fitness : Float64? = nil
+  getter fitness : Float64 do
+    compute_fitness
+  end
+
+  getter weight : Float64 do
+    sum do |item|
+      item.inside? ? item.weight : 0.0
+    end
+  end
+
+  getter volume : Float64 do
+    sum do |item|
+      item.inside? ? item.volume : 0.0
+    end
+  end
 
   def cross(other : Knapsack) : Knapsack
-    pivot = rand @genes.size
+    new_genes = Talgene::Crossable.single_point_cross(@genes, other.genes).sample
 
-    new_genes = if 0.5 < rand
-                  @genes[0...pivot].concat other.genes[pivot..-1]
-                else
-                  other.genes[0...pivot].concat @genes[pivot..-1]
-                end
-
-    Knapsack.new(
-      new_genes,
-      max_weight: @max_weight,
-      max_volume: @max_volume,
-      mutation_rate: @mutation_rate
-    )
+    Knapsack.new new_genes, @max_weight, @max_volume, @mutation_rate
   end
 
   def mutate : Knapsack
-    new_genes = @genes.map_with_index do |gene, i|
-      if @mutation_rate < rand
-        # remove or insert item into the knapsack
-        unless gene.value == 0
-          Item.new value: 0, weight: 0, volume: 0
-        else
-          ITEM_POOL[i]
+    new_genes = map do |item|
+      item.dup.tap do |it|
+        if @mutation_rate > rand
+          it.inside = !it.inside?
         end
-      else
-        gene
       end
     end
 
-    Knapsack.new(
-      new_genes,
-      max_weight: @max_weight,
-      max_volume: @max_volume,
-      mutation_rate: @mutation_rate
-    )
+    Knapsack.new new_genes, @max_weight, @max_volume, @mutation_rate
   end
 
-  def fitness : Float64
-    @fitness ||= compute_fitness
-  end
-
-  def compute_fitness
+  private def compute_fitness
     weight = 0.0
     volume = 0.0
 
-    @genes.reduce 0.0 do |value, item|
-      unless (weight += item.weight) > @max_weight ||
-             (volume += item.volume) > @max_volume
-        value + item.value
+    reduce 0.0 do |fitness, item|
+      unless item.inside?
+        fitness
       else
-        0.0
+        if (weight += item.weight) > @max_weight ||
+           (volume += item.volume) > @max_volume
+          break 0.0
+        else
+          fitness + item.value
+        end
       end
     end
   end
 end
 
 class Generation < Talgene::Generation(Knapsack)
-  @selection : Array(Knapsack)? = nil
-
-  def selection : Array(Knapsack)
-    @selection ||= compute_selection
-  end
-
-  private def compute_selection
+  getter selection : Array(Knapsack) do
     other_bucket = @population.reject do |knapsack|
       knapsack.same? fittest
     end
@@ -109,30 +98,27 @@ class Generation < Talgene::Generation(Knapsack)
   end
 end
 
-population = Array.new 500 do
+population_zero = Array.new 50 do
   genes = ITEM_POOL.map do |item|
     unless 0.5 < rand
-      Item.new value: 0, weight: 0, volume: 0
+      Item.new item.value, item.weight, item.volume, true
     else
       item
     end
   end
 
-  Knapsack.new(
-    genes,
-    max_weight: 20,
-    max_volume: 25,
-    mutation_rate: 0.1
-  )
+  Knapsack.new genes, max_weight: 20, max_volume: 25, mutation_rate: 0.3
 end
 
-system = Talgene::System.new(
-  generation: Generation.new(population),
-  max_iterations: 700
-)
+generation_zero = Generation.new population_zero
 
-fittest_ever = system.each.max_by { |gen| gen.best_fitness }.fittest
+sys = Talgene::System.new generation_zero, max_iterations: 700 do |current|
+  current.best_fitness > 26
+end
 
+fittest_ever = sys.max_of &.fittest
+
+puts "System evaluated at generation #{sys.current_iteration}"
 puts "Fitness: #{fittest_ever.fitness}"
-puts "Weight: #{fittest_ever.genes.sum 0, &.weight}"
-puts "Volume: #{fittest_ever.genes.sum 0, &.volume}"
+puts "Weight: #{fittest_ever.weight}"
+puts "Volume: #{fittest_ever.volume}"
