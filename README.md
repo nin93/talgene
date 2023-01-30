@@ -132,7 +132,7 @@ sys = Talgene::System.new generation_zero, max_iterations: 100
 
 # Since `Talgene::System` includes the `Enumerable` module, a set of convenient methods are
 # provided such as `max_by`, `skip_while`, `select`, `each_cons`. For instance, the fittest
-among all generations is easy to find with `max_of`.
+# among all generations is easy to find with `max_of`.
 fittest_ever = sys.max_of &.fittest
 fittest_ever.fitness # => 26.5
 ```
@@ -142,8 +142,10 @@ process should be ended in advance, useful in those cases in which we would expe
 enough individual beforehand. For instance:
 
 ```crystal
-sys = Talgene::System.new generation_zero, max_iterations: 100 do |current|
-  current.best_fitness > 25.0
+sys = Talgene::System.new generation_zero, max_iterations: 100 do
+  stop_on do |current|
+    current.best_fitness > 26
+  end
 end
 
 sys.size      # => 4

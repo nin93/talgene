@@ -37,13 +37,13 @@ class Knapsack < Talgene::Genome(Item)
     compute_fitness
   end
 
-  getter weight : Float64 do
+  def weight
     sum do |item|
       item.inside? ? item.weight : 0.0
     end
   end
 
-  getter volume : Float64 do
+  def volume
     sum do |item|
       item.inside? ? item.volume : 0.0
     end
@@ -100,7 +100,7 @@ class Generation < Talgene::Generation(Knapsack)
   end
 end
 
-population_zero = Array.new 50 do
+population_zero = Array.new 10 do
   genes = ITEM_POOL.dup
 
   Knapsack.new genes, max_weight: 20, max_volume: 25, mutation_rate: 0.1
@@ -108,8 +108,10 @@ end
 
 generation_zero = Generation.new population_zero
 
-sys = Talgene::System.new generation_zero, max_iterations: 100 do |current|
-  current.best_fitness > 26
+sys = Talgene::System.new generation_zero, max_iterations: 100 do
+  stop_on do |current|
+    current.best_fitness > 26
+  end
 end
 
 fittest_ever = sys.max_of &.fittest
