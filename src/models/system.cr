@@ -17,7 +17,7 @@ module Talgene
       system
     end
 
-    def stop_on(&block : T -> Bool)
+    def stop_on(&block : T, T?, Int32 -> Bool)
       @iterator.stop_on &block
     end
 
