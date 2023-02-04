@@ -10,7 +10,7 @@ module Talgene
     getter population : Array(T)
 
     getter fittest : T do
-      @population.max
+      @population.max_by &.fitness
     end
 
     def best_fitness
