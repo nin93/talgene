@@ -5,7 +5,8 @@ module Talgene
     include Iterable(T)
     include Enumerable(T)
 
-    @iterator : Talgene::Advanceable::AdvanceIterator(T)
+    def initialize(@iterator : Talgene::Advanceable::AdvanceIterator(T))
+    end
 
     def initialize(initial : T, *, max_advances : Int32)
       @iterator = Talgene::Advanceable::AdvanceIterator.new initial, max_advances: max_advances
