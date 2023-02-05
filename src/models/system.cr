@@ -1,18 +1,18 @@
-require "./generation"
+require "../modules/advanceable"
 
 module Talgene
   class System(T)
     include Iterable(T)
     include Enumerable(T)
 
-    @iterator : Talgene::Generation::GenerationIterator(T)
+    @iterator : Talgene::Advanceable::AdvanceIterator(T)
 
-    def initialize(initial : T, *, max_iterations : Int32)
-      @iterator = Talgene::Generation::GenerationIterator.new initial, max_iterations
+    def initialize(initial : T, *, max_advances : Int32)
+      @iterator = Talgene::Advanceable::AdvanceIterator.new initial, max_advances: max_advances
     end
 
-    def self.new(initial : T, *, max_iterations : Int32)
-      system = System.new initial, max_iterations: max_iterations
+    def self.new(initial : T, *, max_advances : Int32)
+      system = System.new initial, max_advances: max_advances
       with system yield
       system
     end
@@ -22,7 +22,7 @@ module Talgene
     end
 
     def current_iteration
-      @iterator.elapsed
+      @iterator.advances
     end
 
     def each
