@@ -8,12 +8,15 @@ module Talgene
     def initialize(@iterator : Talgene::Advanceable::AdvanceIterator(T))
     end
 
-    def initialize(initial : T, *, max_advances : Int32)
-      @iterator = Talgene::Advanceable::AdvanceIterator.new initial, max_advances: max_advances
+    def self.new(initial : T, **iterator_options)
+      iterator = Talgene::Advanceable::AdvanceIterator.new initial, **iterator_options
+      System.new iterator
     end
 
-    def self.new(initial : T, *, max_advances : Int32)
-      system = System.new initial, max_advances: max_advances
+    def self.new(initial : T, **iterator_options)
+      iterator = Talgene::Advanceable::AdvanceIterator.new initial, **iterator_options
+      system = System.new iterator
+
       with system yield
       system
     end
