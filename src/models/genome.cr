@@ -37,11 +37,5 @@ module Talgene
     def size
       @genes.size
     end
-
-    def to_s(io : IO)
-      @genes.each_with_index do |gene, i|
-        io << gene.to_s
-      end
-    end
   end
 end
