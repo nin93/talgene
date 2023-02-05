@@ -21,6 +21,19 @@ module Talgene
       @population.max_by &.fitness
     end
 
+    # Returns a new `Talgene::Generation` populated by the selection of this generation.
+    #
+    # See `#selection`.
+    def advance
+      (typeof(self)).new selection
+    end
+
+    # Returns a new `Talgene::Generation` advancing by a fixed number of steps. Negative
+    # or zero values for `count` will make this method return a copy of `self`.
+    def advance(count : Int)
+      count.times.reduce self.dup, &.advance
+    end
+
     # Convenience method to fetch the best fitness yielded from the population. Same as
     # `fittest.fitness`
     def best_fitness
