@@ -1,10 +1,10 @@
-require "../modules/selectable"
+require "../modules/advanceable"
 
 module Talgene
   # A convenience abstract class to avoid some boilerplate over the implementation of a
-  # `#selection` method.
+  # `#advance` method.
   abstract class Generation(T)
-    include Talgene::Selectable(T)
+    include Talgene::Advanceable(Generation(T))
 
     # Creates a new `Talgene::Generation` instance with supplied array of individuals.
     def initialize(@population : Array(T))
@@ -19,19 +19,6 @@ module Talgene
     # Expects `T` implements `#fitness`. See `Talgene::Fittable`.
     getter fittest : T do
       @population.max_by &.fitness
-    end
-
-    # Returns a new `Talgene::Generation` populated by the selection of this generation.
-    #
-    # See `#selection`.
-    def advance
-      (typeof(self)).new selection
-    end
-
-    # Returns a new `Talgene::Generation` advancing by a fixed number of steps. Negative
-    # or zero values for `count` will make this method return a copy of `self`.
-    def advance(count : Int)
-      count.times.reduce self.dup, &.advance
     end
 
     # Convenience method to fetch the best fitness yielded from the population. Same as
