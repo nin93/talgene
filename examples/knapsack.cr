@@ -140,7 +140,7 @@ end
 
 fittest_ever = sys.max_of &.fittest
 
-puts "System evaluated at generation #{sys.current_iteration}"
+puts "System evaluated at generation #{sys.advances}"
 puts "Fitness: #{fittest_ever.fitness}"
 puts "Weight: #{fittest_ever.weight}"
 puts "Volume: #{fittest_ever.volume}"
