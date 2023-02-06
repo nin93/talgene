@@ -2,8 +2,8 @@ require "../modules/advanceable"
 
 module Talgene
   class System(T)
-    include Iterable(T)
-    include Enumerable(T)
+    include Iterator(T)
+    include IteratorWrapper
 
     def initialize(@iterator : Talgene::Advanceable::AdvanceIterator(T))
     end
@@ -21,20 +21,16 @@ module Talgene
       system
     end
 
+    def next
+      wrapped_next
+    end
+
     def stop_on(&block : T, T?, Int32 -> Bool)
       @iterator.stop_on &block
     end
 
     def current_iteration
       @iterator.advances
-    end
-
-    def each
-      @iterator
-    end
-
-    def each(& : T ->)
-      @iterator.each { |gen| yield gen }
     end
   end
 end
