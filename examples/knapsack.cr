@@ -11,19 +11,6 @@ struct Item
   end
 end
 
-ITEM_POOL = [
-  Item.new(weight: 1.0, value: 2.0, volume: 2.0),
-  Item.new(weight: 1.0, value: 4.0, volume: 3.0),
-  Item.new(weight: 1.0, value: 2.5, volume: 1.0),
-  Item.new(weight: 1.0, value: 3.0, volume: 5.0),
-  Item.new(weight: 2.0, value: 1.5, volume: 2.0),
-  Item.new(weight: 2.0, value: 0.5, volume: 2.0),
-  Item.new(weight: 3.0, value: 4.5, volume: 4.0),
-  Item.new(weight: 2.0, value: 8.5, volume: 8.0),
-  Item.new(weight: 6.0, value: 5.0, volume: 6.0),
-  Item.new(weight: 7.0, value: 5.0, volume: 7.0),
-]
-
 class Knapsack < Talgene::Genome(Item)
   def initialize(
     @genes : Array(Item),
@@ -49,10 +36,10 @@ class Knapsack < Talgene::Genome(Item)
     end
   end
 
-  def cross(other : Knapsack) : Knapsack
-    new_genes = Talgene::Crossable.single_point_cross(@genes, other.genes).sample
-
-    Knapsack.new new_genes, @max_weight, @max_volume, @mutation_rate
+  def cross(other : Knapsack)
+    Talgene::Crossable.single_point_cross(@genes, other.genes).map do |new_genes|
+      Knapsack.new new_genes, @max_weight, @max_volume, @mutation_rate
+    end
   end
 
   def mutate : Knapsack
@@ -89,26 +76,41 @@ class Knapsack < Talgene::Genome(Item)
 end
 
 class Generation < Talgene::Generation(Knapsack)
-  getter selection : Array(Knapsack) do
-    other_bucket = @population.reject do |knapsack|
+  def advance : Generation
+    other_bucket = population.reject do |knapsack|
       knapsack.same? fittest
     end
 
-    Array.new @population.size do
-      fittest.cross(other_bucket.sample).mutate
+    new_population = [] of Knapsack
+
+    while new_population.size < population.size
+      offsprings = fittest.cross other_bucket.sample
+
+      diff = population.size - new_population.size
+      needed = Math.min offsprings.size, diff
+      bucket = offsprings.first needed
+
+      new_population.concat bucket.map &.mutate
     end
+
+    Generation.new new_population
   end
 end
 
-population_zero = Array.new 10 do
-  genes = ITEM_POOL.dup
+ITEM_POOL = [
+  Item.new(2.0, 1.0, 2.0), Item.new(4.0, 1.0, 3.0), Item.new(2.5, 1.0, 1.0),
+  Item.new(3.0, 1.0, 5.0), Item.new(1.5, 2.0, 2.0), Item.new(0.5, 2.0, 2.0),
+  Item.new(4.5, 3.0, 4.0), Item.new(8.5, 2.0, 8.0), Item.new(5.0, 6.0, 6.0),
+  Item.new(5.0, 7.0, 7.0),
+]
 
-  Knapsack.new genes, max_weight: 20, max_volume: 25, mutation_rate: 0.1
+population_zero = Array.new 50 do
+  Knapsack.new ITEM_POOL.dup, 20, 25, mutation_rate: 0.1
 end
 
 generation_zero = Generation.new population_zero
 
-sys = Talgene::System.new generation_zero, max_iterations: 100 do
+sys = Talgene::System.new generation_zero, max_advances: 100 do
   stop_on do |current|
     current.best_fitness > 26
   end

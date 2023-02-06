@@ -1,7 +1,7 @@
 # Talgene
 
-A simple programming abstraction layer over [genetic algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm)
-implementations.
+A simple programming abstraction layer over
+[genetic algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm) implementations.
 
 ## Installation
 
@@ -26,9 +26,9 @@ require "talgene"
 Start by defining your genetic representation for your model. In the following example we
 implement a solution for the [knapsack problem](https://en.wikipedia.org/wiki/Knapsack_problem).
 
-An abstract class `Talgene::Genome` is provided for this purpose, requiring you to implement all
-the methods needed. Within each model a `fitness` function is expected to be defined to evaluate
-the solution domain:
+An abstract class `Talgene::Genome` is provided for this purpose, requiring you to
+implement all the methods needed. Within each model a `fitness` function is expected to be
+defined to evaluate the solution domain:
 
 ```crystal
 class Item
@@ -96,67 +96,68 @@ end
 
 ### Generation
 
-We now need to define the rules to perform a selection among competing individuals within a
-population. This is done by inheriting from the `Talgene::Generation` abstract class and by
-implementing a `selection` function:
+We now need to define the rules to perform a selection among competing individuals within
+a population and start a new generation. This is done by inheriting from the
+`Talgene::Generation` abstract class and by implementing an `advance` method:
 
 ```crystal
 class Generation < Talgene::Generation(Knapsack)
-  def selection : Array(Knapsack)
+  def advance : Generation
     # Avoid recombination with self
-    other_bucket = @population.reject do |knapsack|
+    other_bucket = population.reject do |knapsack|
       knapsack.same? fittest
     end
 
-    Array.new @population.size do
+    new_population = Array.new population.size do
       fittest.cross(other_bucket.sample).mutate
     end
+
+    Generation.new new_population
   end
 end
 ```
 
-Each selection will be the population of the immediate next generation in a evolutionary
-simulation context. This is detailed in the next chapter.
-
 ### System
 
-`Talgene::System` takes care to iterate through a fixed number of generations.
-We load the generation zero:
+`Talgene::System` takes care to iterate through generations. We load the generation zero:
 
 ```crystal
 # Initialize your generation zero
 population_zero = [...] of Knapsack
 generation_zero = Generation.new population_zero
 
-sys = Talgene::System.new generation_zero, max_iterations: 100 
+sys = Talgene::System.new generation_zero, max_advances: 100
 
-# Since `Talgene::System` includes the `Enumerable` module, a set of convenient methods are
-# provided such as `max_by`, `skip_while`, `select`, `each_cons`. For instance, the fittest
-# among all generations is easy to find with `max_of`.
+# Use `include_first: true` to include the generation zero
+sys = Talgene::System.new generation_zero, max_advances: 100, include_first: true
+```
+
+Since `Talgene::System` includes the `Enumerable` module, a set of convenient
+methods are provided such as `max_by`, `skip_while`, `select`, `each_cons`.
+
+```crystal
+# The fittest among all generations is easy to find with `max_of`.
 fittest_ever = sys.max_of &.fittest
 fittest_ever.fitness # => 26.5
 ```
 
 Optionally, a `Talgene::System` can be initialized with a rule declaring when an evolution
 process should be ended in advance, useful in those cases in which we would expect a good
-enough individual beforehand. For instance:
+enough individual beforehand.
+
+For instance:
 
 ```crystal
-sys = Talgene::System.new generation_zero, max_iterations: 100 do
+sys = Talgene::System.new generation_zero, max_advances: 100 do
   stop_on do |current|
     current.best_fitness > 26
   end
 end
 
+# Consume the iterator
 sys.size      # => 4
 sys.each.next # => Iterator::Stop
 ```
-
-Full depth iterations will not exceed the `max_iterations` anyways.
-
-Note: since the first iteration is always the generation zero, the `max_iterations`
-parameter refers to the number of actual advances, such that the overall number of
-_evaluated generations_ is `max_iterations + 1`.
 
 A [full example](./examples/knapsack.cr) can be found in the examples folder.
 
