@@ -132,7 +132,7 @@ sys = Talgene::System.new generation_zero, max_advances: 100
 sys = Talgene::System.new generation_zero, max_advances: 100, include_first: true
 ```
 
-Since `Talgene::System` includes the `Enumerable` module, a set of convenient
+Since `Talgene::System` includes the `Iterator` module, a set of convenient
 methods are provided such as `max_by`, `skip_while`, `select`, `each_cons`.
 
 ```crystal
@@ -155,8 +155,8 @@ sys = Talgene::System.new generation_zero, max_advances: 100 do
 end
 
 # Consume the iterator
-sys.size      # => 4
-sys.each.next # => Iterator::Stop
+sys.size # => 4
+sys.next # => Iterator::Stop::INSTANCE
 ```
 
 A [full example](./examples/knapsack.cr) can be found in the examples folder.
