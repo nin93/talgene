@@ -44,10 +44,10 @@ module Talgene
     # Must return the next term of this series.
     abstract def advance : T
 
-    # Returns a new instance advancing by a fixed number of steps. Negative or zero values
-    # for `count` will make this method return a copy of `self`.
+    # Returns the term of this series which is `count` steps away or `self` if `count` is
+    # negative or zero.
     def advance(count : Int)
-      count.times.reduce self.dup, &.advance
+      count.times.reduce self, &.advance
     end
   end
 end
