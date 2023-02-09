@@ -31,14 +31,8 @@ implement all the methods needed. Within each model a `fitness` function is expe
 defined to evaluate the solution domain:
 
 ```crystal
-class Item
-  getter value : Float64
-  getter weight : Float64
-
-  property? inside : Boolean
-
-  def initialize(@value : Float64, @weight : Float64, @inside : Boolean)
-  end
+record Item, value : Float64, weight : Float64 do
+  property? inside : Bool = false
 end
 
 class Knapsack < Talgene::Genome(Item)

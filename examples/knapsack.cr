@@ -22,15 +22,8 @@
 
 require "../src/talgene"
 
-struct Item
-  getter value : Float64
-  getter weight : Float64
-  getter volume : Float64
-
-  property? inside : Bool
-
-  def initialize(@value : Float64, @weight : Float64, @volume : Float64, @inside : Bool = false)
-  end
+record Item, value : Float64, weight : Float64, volume : Float64 do
+  property? inside : Bool = false
 end
 
 class Knapsack < Talgene::Genome(Item)
