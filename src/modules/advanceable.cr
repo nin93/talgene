@@ -46,6 +46,21 @@ module Talgene
 
     # Returns the term of this series which is `count` steps away or `self` if `count` is
     # negative or zero.
+    #
+    # ```
+    # require "talgene"
+    #
+    # record Integer, value : Int32 do
+    #   include Talgene::Advanceable(Integer)
+    #
+    #   def advance : Integer
+    #     Integer.new @value + 1
+    #   end
+    # end
+    #
+    # integer = Integer.new(0)
+    # integer.advance(10) # => Integer(@value=10)
+    # ```
     def advance(count : Int)
       count.times.reduce self, &.advance
     end
